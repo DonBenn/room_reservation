@@ -1,28 +1,25 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 
-class MeetingRoomCreate(BaseModel):
-    name: str = Field(
-        ..., max_length=100,
-        title='Полное имя', description='Можно вводить в любом регистре'
-    )
+# Базовый класс схемы, от которого наследуем все остальные.
+class MeetingRoomBase(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str]
 
-    @validator('name')
-    # Первый параметр функции-валидатора должен называться строго cls.
-    # Вторым параметром идет проверяемое значение, его можно назвать как угодно.
-    # Декоратор @classmethod ставить нельзя, иначе валидатор не сработает.
-    def name_cant_be_numeric(cls, value: str):
-        # Проверяем, не состоит ли строка исключительно из цифр:
-        # if value.isnumeric():
-        #     # При ошибке валидации можно выбросить
-        #     # ValueError, TypeError или AssertionError.
-        #     # В нашем случае подходит ValueError.
-        #     # В аргумент передаём сообщение об ошибке.
-        #     raise ValueError('Имя не может быть числом')
-        if len(value) > 100:
-            raise ValueError('Слишком длинное имя, не более 100 символов')
-        # Если проверка пройдена, возвращаем значение поля.
-        return value
+
+# Теперь наследуем схему не от BaseModel, а от MeetingRoomBase.
+class MeetingRoomCreate(MeetingRoomBase):
+    # Переопределяем атрибут name, делаем его обязательным.
+    name: str = Field(..., min_length=1, max_length=100)
+    # Описывать поле description не нужно: оно уже есть в базовом классе.
+
+
+# Возвращаемую схему унаследуем от MeetingRoomCreate,
+# чтобы снова не описывать обязательное поле name.
+class MeetingRoomDB(MeetingRoomCreate):
+    id: int
+
+    class Config:
+        orm_mode = True

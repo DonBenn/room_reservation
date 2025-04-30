@@ -13,9 +13,6 @@ class CRUDReservation(CRUDBase):
 
     async def get_reservations_at_the_same_time(
             self,
-            # Добавляем звёздочку, чтобы обозначить, что все дальнейшие параметры
-            # должны передаваться по ключу. Это позволит располагать
-            # параметры со значением по умолчанию перед параметрами без таких значений.
             *,
             from_reserve: datetime,
             to_reserve: datetime,
@@ -23,7 +20,6 @@ class CRUDReservation(CRUDBase):
             reservation_id: Optional[int] = None,
             session: AsyncSession,
     ) -> list[Reservation]:
-        # Выносим уже существующий запрос в отдельное выражение.
         select_stmt = select(Reservation).where(
             Reservation.meetingroom_id == meetingroom_id,
             and_(
@@ -31,14 +27,10 @@ class CRUDReservation(CRUDBase):
                 to_reserve >= Reservation.from_reserve
             )
         )
-        # Если передан id бронирования...
         if reservation_id is not None:
-            # ... то к выражению нужно добавить новое условие.
             select_stmt = select_stmt.where(
-                # id искомых объектов не равны id обновляемого объекта.
                 Reservation.id != reservation_id
             )
-        # Выполняем запрос.
         reservations = await session.execute(select_stmt)
         reservations = reservations.scalars().all()
         return reservations
@@ -49,12 +41,8 @@ class CRUDReservation(CRUDBase):
             session: AsyncSession,
     ):
         reservations = await session.execute(
-            # Получить все объекты Reservation.
             select(Reservation).where(
-                # Где внешний ключ meetingroom_id
-                # равен id запрашиваемой переговорки.
                 Reservation.meetingroom_id == room_id,
-                # А время конца бронирования больше текущего времени.
                 Reservation.to_reserve > datetime.now()
             )
         )

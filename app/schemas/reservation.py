@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Extra, root_validator, validator, Field
 
+
 FROM_TIME = (
     datetime.now() + timedelta(minutes=10)
 ).isoformat(timespec='minutes')

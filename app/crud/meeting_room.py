@@ -7,14 +7,9 @@ from app.crud.base import CRUDBase
 from app.models.meeting_room import MeetingRoom
 
 
-# Создаем новый класс, унаследованный от CRUDBase.
 class CRUDMeetingRoom(CRUDBase):
 
-    # Преобразуем функцию в метод класса.
     async def get_room_id_by_name(
-            # Дописываем параметр self.
-            # В качестве альтернативы здесь можно
-            # применить декоратор @staticmethod.
             self,
             room_name: str,
             session: AsyncSession,

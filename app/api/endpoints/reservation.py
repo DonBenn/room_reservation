@@ -76,17 +76,13 @@ async def update_reservation(
         reservation_id, session, user
     )
     await check_reservation_intersections(
-        # Новое время бронирования, распакованное на ключевые аргументы.
         **obj_in.dict(),
-        # id обновляемого объекта бронирования,
         reservation_id=reservation_id,
-        # id переговорки.
         meetingroom_id=reservation.meetingroom_id,
         session=session
     )
     reservation = await reservation_crud.update(
         db_obj=reservation,
-        # На обновление передаем объект класса ReservationUpdate, как и требуется.
         obj_in=obj_in,
         session=session,
     )
@@ -94,19 +90,16 @@ async def update_reservation(
 
 
 @router.get(
-    '/my_reservations', 
+    '/my_reservations',
     response_model=list[ReservationDB],
     response_model_exclude={'user_id'},
 )
 async def get_my_reservations(
         session: AsyncSession = Depends(get_async_session),
-        # В этой зависимости получаем обычного пользователя, а не суперюзера.
         user: User = Depends(current_user)
 ):
-    # Сразу можно добавить докстринг для большей информативности.
     """Получает список всех бронирований для текущего пользователя."""
-    # Вызываем созданный метод.
     reservations = await reservation_crud.get_by_user(
         session=session, user=user
     )
-    return reservations 
+    return reservations
